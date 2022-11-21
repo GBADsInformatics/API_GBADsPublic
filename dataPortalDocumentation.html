@@ -1,0 +1,196 @@
+<html>
+<head> 
+<style>
+ol { margin-left:8%; margin-right:8%; font-size:14pt }
+ul { margin-left:8%; margin-right:8%; font-size:14pt }
+table { font-family: arial, sans-serif; border-collapse: collapse; width: 80%; }
+td, th { border: 1px solid #dddddd; text-align: left; padding: 8px; }
+tr:nth-child(even) { background-color: #dddddd; }
+</style>
+</header>
+<body>
+<br>
+<hr>
+<center>
+<H1>GBADs Data Portal Documentation</h1>
+</center>
+<hr>
+
+<p style="margin-left:3%; margin-right:3%; font-size:20pt">
+<b>Introduction</b>
+
+<p style="margin-left:5%; margin-right:5%; font-size:14pt">
+Welcome to the GBADs Data Portal and API.  Through this portal you can retrieve any data contained in the GBADs public databases.  This public data portal does not require a login or API tokens.  The Portal currently contains data from OIE, FAOSTAT, and the Central Statistical Agency of Ethiopia.  Other data will be added in the future.
+
+This introductory page contains information on how to use the Portal and has a Quick API Guide with common API calls that you can use and
+adapt.
+</p>
+
+<p style="margin-left:3%; margin-right:3%; font-size:20pt">
+<b>Using the API</b>
+</p>
+
+<p style="margin-left:5%; margin-right:5%; font-size:14pt">
+You can use the API in three (3) different ways:
+<ol>
+<li> As an HTML command where the result will be an html page or a CSV file:
+   <ul>
+           <li> <i>http://gbadske.org:9000/dataportal/</i>
+           <li> <i>http://gbadske.org:9000/GBADsTables/public?format=html</i>
+           <li> <i>http://gbadske.org:9000/GBADsLivestockPopulation/faostat?year=2017&country=Canada&species=*&format=file</i>
+   </ul>
+<br>
+<li> As a cURL command line tool where the result will be text:
+   <ul>
+   <li> On Unix-based systems (Mac OSX, Linux):
+           <ul>
+                   <li> <i>curl "http://gbadske.org:9000/GBADsTables/public?format=text"</i>
+                           <li> <i>curl "http://gbadske.org:9000/GBADsLivestockPopulation/faostat?year=2017&country=Canada&species=*&format=file"</i> <br>where the reponse is: <p> country,year,species,population<br>
+                                   "Canada","2017","Beehives","701033"<br>
+                                   "Canada","2017","Cattle","11535000"<br>
+                                   "Canada","2017","Chickens","170120000"<br>
+                                   "Canada","2017","Ducks","1499000"<br>
+                                   "Canada","2017","Geese and guinea fowls","323000"<br>
+                                   "Canada","2017","Goats","30050"<br>
+                                   "Canada","2017","Horses","397870"<br>
+                                   "Canada","2017","Mules","4000"<br>
+                                   "Canada","2017","Pigs","13935000"<br>
+                                   "Canada","2017","Sheep","813900"<br>
+                                   "Canada","2017","Turkeys","5687000"<br>
+                                   "Canada","2017","Cattle and Buffaloes","11535000"<br>
+                                   "Canada","2017","Poultry Birds","177629000"<br>
+                                   "Canada","2017","Sheep and Goats","843950"<br>
+                                   </p>
+           </ul>
+   <li> On Windows systems using Powershell where the result will be text:
+           <ul>
+                   <li> <i>curl.exe http://gbadske.org:900/GBADsTable/public?table_name=livestock_production_faostat&format=text</i>
+           </ul>
+   </ul>
+<br>
+<li> In an R or Python program:
+   <ul>
+   <li> R examples are in GitHub repo (reference to be added)
+   <li> Python example (apiExample.py in GitHub repo - link to be added)
+   </ul>
+</ol>
+</p>
+
+<p style="margin-left:3%; margin-right:3%; font-size:20pt">
+<b>Quick API Guide</b>
+</p>
+<p style="margin-left:5%; margin-right:5%; font-size:14pt">
+These commands are designed to make specific population queries of <b>OIE</b> and <b>FAOSTAT</b> population data and return <b>"country, year, species, population"</b>
+<ul>
+        <li> Get <b>OIE</b> population data on <b>Cattle</b> for all years for a specific country, <i>e.g. Germany</i> and return it as a CSV file<br>
+        <i>http://gbadske.org:9000/GBADsLivestockPopulation/oie?species=Cattle&year=*&country=Germany&format=file</i>
+        <br><br>
+        <li> Get <b>FAOSTAT</b> population data on <b>Sheep</b> for <b>2010</b> for a specific country, <i>e.g. Australia</i> and display as html<br>
+        <i>http://gbadske.org:9000/GBADsLivestockPopulation/faostat?species=Sheep&year=2010&country=Australia&format=html</i>
+        <br><br>
+        <li> Get <b>OIE</b> population data on <b>all Poultry categories</b> populations for all years for a specific country, <i>e.g. Switzerland</i> and return it as a CSV file<br>
+        <i>http://gbadske.org:9000/GBADsLivestockPopulation/oie?species=Poultry&year=*&country=Switzerland&format=file</i>
+        <br><br>
+</ul>
+</p>
+
+<p style="margin-left:3%; margin-right:3%; font-size:20pt">
+<b>API Commands Reference</b>
+</p>
+
+<p style="margin-left:5%; margin-right:5%; font-size:14pt">
+<i>http://gbadske.org:9000/dataportal/</i>
+<ul>
+<li> This will provide documentation about the GBADs Data Portal including how to use the API to the GBADs Public Database.
+<li> It will also give the status of the Data Portal.
+</ul>
+</p>
+
+<p style="margin-left:5%; margin-right:5%; font-size:14pt">
+<i>http://gbadske.org:9000/GBADsTables/public?format=html &nbsp; | &nbsp; text</i>
+<ul>
+<li> This command returns the names of all of the tables that exist in the GBADs Public Database. The informationis returned either as a HTML page or as text and this is indicated by the parameter format.  If format does not appear then the default is html.
+<li> Example commands:
+   <ul>
+           <li> <i>http://gbadske.org:9000/GBADsTables/public?format=html</i>
+           <li> <i>http://gbadske.org:9000/GBADsTables/public?format=text</i>
+   </ul>
+</ul>
+</p>
+
+<p style="margin-left:5%; margin-right:5%; font-size:14pt">
+<i>http://gbadske.org:9000/GBADsTable/public?table_name=table_name&format=html &nbsp; | &nbsp; text</i>
+<ul>
+<li> This command returns the column/field names in the given table (<table_name>).  It will be returned as html or as text.
+<li> The type of return is designated by format but this is an optional parameter.  If format is not present then the response will be html.
+<li> The required parameter is table name.
+<li> Example commands:
+   <ul>
+           <li> <i>http://gbadske.org:9000/GBADsTable/public?table_name=eth_csa_goats_health&format=html or http://gbadske.org:9000/GBADsTable/public?table_name=eth_csa_goats_health</i>
+           <li> <i> http://gbadske.org:9000/GBADsTable/public?table_name=eth_csa_goats_health&format=text</i>
+   </ul>
+</ul>
+</p>
+
+<p style="margin-left:5%; margin-right:5%; font-size:14pt">
+<i>http://gbadske.org:9000/GBADsLivestockPopulation/data_source{faostat &nbsp; | &nbsp; oie}</i>
+<ul>
+<li> This commands retrieves data from one of the livestock population tables in the public database.
+<li> Currently (as of 2021-10-26) there are two livestock tables: faostat and oie.
+<li> The required parameters are:
+   <ul>
+   <li> data_source which is currently either faostat or oie
+   <li> format which is either html or file
+   </ul>
+<li> Optional parameters are:
+   <ul>
+   <li> year which can be a single year or an * which signifies all years and is the default if year does not appear as a parameter
+   <li> country which can be a country name or an * which signifies all countries and is the default if country does not appear as a parameter
+   <li> iso3 which is the country ISO code (3 characters) or an * which signifies all countries and is the default if iso3 does not appear as a parameter
+   <li> <B>Special notes:</b> Only one of country or iso3 can appear since they refer to the same concept.  Also, currently the country/iso3 choice is only implemented for FAOSTAT and not OIE
+   <li> species which can be a species name or an * which signifies all species and is the default if species does not appear as a parameter
+   </ul>
+<li> Example commands:
+   <ul>
+        <li> <i>http://gbadske.org:9000/GBADsLivestockPopulation/faostat?year=2017&country=Canada&species=*&format=html</i>
+                <ul>
+                <li> Returns population numbers for all species in Canada in the year 2017 from FAOSTAT (as html)
+                </ul>
+        <li> <i>http://gbadske.org:9000/GBADsLivestockPopulation/oie?year=2017&country=Canada&species=*&format=html</i>
+        <ul>
+                <li> Returns population numbers for all species in Canada in the year 2017 from OIE (as html)
+        </ul>
+        <li> <i>http://gbadske.org:9000/GBADsLivestockPopulation/oie?year=*&country=Canada&species=Cattle&format=html</i>
+        <ul>
+                <li> Returns population numbers for Cattle in Canada in all years from OIE (as html)
+        </ul>
+        <li> <i>http://gbadske.org:9000/GBADsLivestockPopulation/faostat?iso3=AUS&species=Cattle&format=html</i>
+        <ul>
+                <li> Returns population number for Cattle in Australia for all years from FAOSTAT (as html)
+        </ul>
+   </ul>
+</ul>
+</p>
+
+<p style="margin-left:5%; margin-right:5%; font-size:14pt">
+<i>http://gbadske.org:9000/GBADsPublicQuery/{table_name}</i>
+<ul>
+<li> <b>This command is still a work in progress - to be updated very soon!</b>
+<li> This command performs a general query on a table in the GBADs Public Database.
+<li> The required parameters are
+   <ul>
+   <li> table name
+   <li> fields
+   <li> query
+   <li> format
+   </ul>
+<li> Example commands:
+   <ul>
+           <li> <i>http://gbadske.org:9000/GBADsPublicQuery/livestock_production_faostat?fields=country,year,species,population&query=year=2017%20AND%20species=%27Goats%27&format=html</i>
+           <li> <i>http://gbadske.org:9000/GBADsPublicQuery/livestock_production_faostat?fields=country,year,species,population&query=year=2017%20AND%20species=%27Goats%27&format=file</i>
+   </ul>
+</ul>
+</p>
+
+</body>
+</html>
