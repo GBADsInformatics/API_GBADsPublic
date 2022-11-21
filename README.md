@@ -21,7 +21,9 @@ Improvements that need to be made:
 1. Improve the logging
 2. Clean up file created by the API
 3. Send error messages to the user and not just to the console
-4. Add * to fields to generate all fields for the general query capability
+4. Check to make sure that sql injection is not a problem
+5. Clean up code and document
+6. Add * to fields to generate all fields for the general query capability
    - fields=* does work but it does not retrieve the field names
    - need to add a subroutine to fetch field names - the following code will do this:
          
@@ -30,7 +32,5 @@ cur.execute(f"""SELECT * FROM {table_name} ;""")
 rows = cur.fetchone()
          
 column_names = [desc[0] for desc in cur.description]
-5. Check to make sure that sql injection is not a problem
-6. Clean up code and document
 
 
