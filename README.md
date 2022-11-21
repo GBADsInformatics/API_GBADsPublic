@@ -17,6 +17,9 @@ This will need to be backgrounded to stay running and let you use the shell.  It
 print out error messages to the console so you should pipe these into a log file for now.
 It is good to use nohup to ensure that the process is not interrupted.
 
+To access the API in your web browser start with the command:
+http://localhost:9000/dataportal/
+
 Improvements that need to be made:
 1. Improve the logging
 2. Clean up file created by the API
