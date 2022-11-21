@@ -33,4 +33,8 @@ rows = cur.fetchone()
          
 column_names = [desc[0] for desc in cur.description]
 
+## Notes
+
+- You will need a file called secure_rds.py to run the RDS commands but that file contains
+password information so you must request it from Deb Stacey
 
