@@ -5,7 +5,7 @@ To install and run this application you need to install FastAPI and other Python
  -  pip (or pip3) install fastapi
  -  pip (or pip3) install uvicorn
  -  pip (or pip3) install pandas
- -  pip (or pip3) install typing 
+ -  pip (or pip3) install typing
  -  pip (or pip3) install pathlib
  -  pip (or pip3) install psycopg2
 
@@ -29,11 +29,11 @@ Improvements that need to be made:
 6. Add * to fields to generate all fields for the general query capability
    - fields=* does work but it does not retrieve the field names
    - need to add a subroutine to fetch field names - the following code will do this:
-         
+
 cur.execute(f"""SELECT * FROM {table_name} ;""")
-         
+
 rows = cur.fetchone()
-         
+
 column_names = [desc[0] for desc in cur.description]
 
 ## Notes

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response, BackgroundTasks
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.responses import PlainTextResponse
 from typing import Optional
@@ -7,8 +7,12 @@ import uvicorn
 import secure_rds as secure
 import rds_functions as rds
 import pandas as pd
+import os
 
 app = FastAPI()
+
+def remove_file(path):
+    os.unlink(path)
 
 @app.get("/dataportal/")
 def home():
@@ -64,7 +68,7 @@ async def get_public_table_fields( public: str, table_name: str, format: Optiona
         return PlainTextResponse(retstring)
 
 @app.get("/GBADsPublicQuery/{table_name}")
-async def get_db_query( table_name: str, fields: str, query: str, join: Optional[str] = "", order: Optional[str] = "", format: Optional[str] = "html", count: Optional[str] = "no", pivot: Optional[str] = "" ):
+async def get_db_query( table_name: str, fields: str, query: str, join: Optional[str] = "", order: Optional[str] = "", format: Optional[str] = "html", count: Optional[str] = "no", pivot: Optional[str] = "",  background_tasks: BackgroundTasks = None  ):
     conn = secure.connect_public()
     cur = conn.cursor()
     columns = fields.split(",")
@@ -117,10 +121,12 @@ async def get_db_query( table_name: str, fields: str, query: str, join: Optional
     if format == "html":
         return HTMLResponse(htmlstring)
     else:
+        # Remove file after sending it
+        background_tasks.add_task(remove_file, file_name)
         return FileResponse(file_name,filename=file_name)
 
 @app.get("/GBADsLivestockPopulation/{data_source}")
-async def get_population ( data_source: str, format: str, year: Optional[str] = "*", iso3: Optional[str] = "*", country: Optional[str] = "*", species: Optional[str] = "*" ):
+async def get_population ( data_source: str, format: str, year: Optional[str] = "*", iso3: Optional[str] = "*", country: Optional[str] = "*", species: Optional[str] = "*", background_tasks: BackgroundTasks = None ):
     conn = secure.connect_public()
     cur = conn.cursor()
     joinstring = ""
@@ -213,7 +219,10 @@ async def get_population ( data_source: str, format: str, year: Optional[str] = 
     htmlstring = htmlstring+"</table></body></html>"
     f.close()
     if format == "file":
+        # Remove file after sending it
+        background_tasks.add_task(remove_file, file_name)
         return FileResponse(file_name,filename=file_name)
+
     elif format == "html":
         return HTMLResponse(htmlstring)
 
