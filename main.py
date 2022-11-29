@@ -16,9 +16,9 @@ app = FastAPI()
 def remove_file(path):
     try:
         os.unlink(path)
-        logging.log("Successfully removeed file")
+        logging.info("Successfully removed file")
     except Exception as e:
-        logging.exception("Failed to delete %s." % path)
+        logging.error("Failed to delete %s." % path)
 
 #Telling the logger where to log the information
 logging.basicConfig(filename="logs/logs.txt", level=logging.DEBUG, format="%(asctime)s %(message)s")
@@ -39,15 +39,19 @@ async def get_public_tables( public: str, format: Optional[str] = "html"):
     try:
         conn = secure.connect_public()
         cur = conn.cursor()
-        logging.log("Connected to GBAD database")
+        logging.info("Connected to GBAD database")
     except:
-        logging.log("Error connecting to GBAD database")
+        logging.error("Error connecting to GBAD database")
         return "Error connecting to GBAD database"
-    tables = rds.displayTables ( cur )
+
+    logging.info("Fetching tables")
+    tables = rds.displayTables(cur)
     num = len(tables)
     htmlstring = "<html><body><H2>GBADs Public Database Tables</h2><ul>"
     retstring = ""
     ct = 0
+
+    logging.info("Formatting tables into HTML and the return string")
     for table in tables:
         ct = ct + 1
         if ct < num:
@@ -59,9 +63,12 @@ async def get_public_tables( public: str, format: Optional[str] = "html"):
         else:
             htmlstring = htmlstring+"<li> "+table[1]+"</ul></body></html>"
             retstring = retstring+","+table[1]
+
     if format == "text":
+        logging.info("Returning tables as text")
         return PlainTextResponse(retstring)
     else:
+        logging.info("Returning tables as HTML")
         return HTMLResponse(htmlstring)
 
 @app.get("/GBADsTable/{public}")
@@ -71,16 +78,19 @@ async def get_public_table_fields( public: str, table_name: str, format: Optiona
     try:
         conn = secure.connect_public()
         cur = conn.cursor()
-        logging.log("Connected to GBAD database")
+        logging.info("Connected to GBAD database")
     except:
-        logging.log("Error connecting to GBAD database")
+        logging.error("Error connecting to GBAD database")
         return "Error connecting to GBAD database"
 
+    logging.info("Fetching fields")
     fields = rds.displayTabInfo ( cur, table_name )
     num = len(fields)
     htmlstring = "<html><body><H2>Data Fields for "+str(table_name)+"</h2><ul>"
     retstring = ""
     ct = 0
+
+    logging.info("Formatting fields into HTML and the return string")
     for field in fields:
         ct = ct + 1
         if ct < num:
@@ -89,9 +99,12 @@ async def get_public_table_fields( public: str, table_name: str, format: Optiona
         else:
             htmlstring = htmlstring+"<li> "+field[0]+" ("+field[1]+") </ul></body></html>"
             retstring = retstring+field[0]
+
     if format == "html":
+        logging.info("Returning fields as HTML")
         return HTMLResponse(htmlstring)
     else:
+        logging.info("Returning fields as text")
         return PlainTextResponse(retstring)
 
 @app.get("/GBADsPublicQuery/{table_name}")
@@ -101,11 +114,12 @@ async def get_db_query( table_name: str, fields: str, query: str, join: Optional
     try:
         conn = secure.connect_public()
         cur = conn.cursor()
-        logging.log("Connected to GBAD database")
+        logging.info("Connected to GBAD database")
     except:
-        logging.log("Error connecting to GBAD database")
+        logging.error("Error connecting to GBAD database")
         return "Error connecting to GBAD database"
 
+    logging.info("Formatting the query")
     columns = fields.split(",")
     joinitems = []
     if join != "":
@@ -117,6 +131,8 @@ async def get_db_query( table_name: str, fields: str, query: str, join: Optional
         joinstring = rds.setJoin ( table_name1, table_name2, jfield_1, jfield_2 )
     else:
         joinstring = ""
+
+    logging.info("Setting and running the query on the database")
     if count == "no":
         querystr = rds.setQuery ( table_name, fields, query, joinstring )
     else:
@@ -128,6 +144,7 @@ async def get_db_query( table_name: str, fields: str, query: str, join: Optional
 #debugging
     retQ = rds.execute ( cur, querystr )
 
+    logging.info("Formatting the results into a file and reutrn string")
     htmlstring = "<head> <style> table { font-family: arial, sans-serif; border-collapse: collapse; width: 80%; }"
     htmlstring = htmlstring+" td, th { border: 1px solid #dddddd; text-align: left; padding: 8px; }"
     htmlstring = htmlstring+" tr:nth-child(even) { background-color: #dddddd; } </style> </head>"
@@ -153,10 +170,13 @@ async def get_db_query( table_name: str, fields: str, query: str, join: Optional
         print ( "\""+str(field[x])+"\"", file=f  )
     htmlstring = htmlstring+"</table></body></html>"
     f.close()
+
     if format == "html":
+        logging.info("Returning results as HTML")
+        remove_file(file_name)
         return HTMLResponse(htmlstring)
     else:
-        # Remove file after sending it
+        logging.info("Returning results as CSV")
         background_tasks.add_task(remove_file, file_name)
         return FileResponse(file_name,filename=file_name)
 
@@ -167,13 +187,12 @@ async def get_population ( data_source: str, format: str, year: Optional[str] = 
     try:
         conn = secure.connect_public()
         cur = conn.cursor()
-        logging.log("Connected to GBAD database")
+        logging.info("Connected to GBAD database")
     except:
-        logging.log("Error connecting to GBAD database")
+        logging.error("Error connecting to GBAD database")
         return "Error connecting to GBAD database"
 
-    print("HERE")
-
+    logging.info("Formatting query")
     joinstring = ""
     if data_source == "oie":
         table_name = "livestock_national_population_"+data_source
@@ -230,8 +249,10 @@ async def get_population ( data_source: str, format: str, year: Optional[str] = 
         else:
             query = query+" AND "+query3
 
+    logging.info("Setting and runnning the query on the database")
     querystr = rds.setQuery ( table_name, fields, query, joinstring )
     retQ = rds.execute ( cur, querystr )
+
     htmlstring = "<head> <style> table { font-family: arial, sans-serif; border-collapse: collapse; width: 80%; }"
     htmlstring = htmlstring+" td, th { border: 1px solid #dddddd; text-align: left; padding: 8px; }"
     htmlstring = htmlstring+" tr:nth-child(even) { background-color: #dddddd; } </style> </head>"
@@ -245,6 +266,8 @@ async def get_population ( data_source: str, format: str, year: Optional[str] = 
     f = open(file_name, "w")
     print ( fields, file=f  )
     print("retQ",retQ)
+
+    logging.info("Adding the returned data to the htmlstring and CSV file")
     for field in retQ:
         x = 0
         htmlstring = htmlstring+"<tr>"
@@ -264,16 +287,15 @@ async def get_population ( data_source: str, format: str, year: Optional[str] = 
             print ( str(field[x]), file=f  )
     htmlstring = htmlstring+"</table></body></html>"
     f.close()
+
     if format == "file":
-        print("A")
         # Remove file after sending it
         background_tasks.add_task(remove_file, file_name)
-        logging.info("Returning file "+file_name)
+        logging.info("Returning data as a csv")
         return FileResponse(file_name,filename=file_name)
 
     elif format == "html":
-        print("B")
-        logging.info("Returning file "+htmlstring)
+        logging.info("Returning data as HTML")
         return HTMLResponse(htmlstring)
 
 if __name__ == "__main__":
