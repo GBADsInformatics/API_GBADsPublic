@@ -22,13 +22,16 @@ http://localhost:9000/dataportal/
 
 Improvements that need to be made:
 1. Improve the logging
-2. Clean up file created by the API
-3. Send error messages to the user and not just to the console
-4. Check to make sure that sql injection is not a problem
-5. Clean up code and document
-6. Add * to fields to generate all fields for the general query capability
+2. Send error messages to the user and not just to the console
+3. Check to make sure that sql injection is not a problem
+4. Clean up code and document
+5. Add * to fields to generate all fields for the general query capability
    - fields=* does work but it does not retrieve the field names
    - need to add a subroutine to fetch field names - the following code will do this:
+
+Improvements made:
+1. Clean up file created by the API
+
 
 cur.execute(f"""SELECT * FROM {table_name} ;""")
 
@@ -41,3 +44,9 @@ column_names = [desc[0] for desc in cur.description]
 - You will need a file called secure_rds.py to run the RDS commands but that file contains
 password information so you must request it from Deb Stacey
 
+
+## Example Calls From each API
+1. ```http://gbadske.org:9000/GBADsTables/public?format=text```
+2. ```http://gbadske.org:900/GBADsTable/public?table_name=livestock_production_faostat&format=text```
+3. ```http://gbadske.org:9000/GBADsPublicQuery/livestock_production_faostat?fields=country,year,species,population&query=year=2017%20AND%20species=%27Goats%27&format=html```
+4. ```http://gbadske.org:9000/GBADsLivestockPopulation/oie?year=*&country=Canada&species=Cattle&format=html```

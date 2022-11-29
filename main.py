@@ -8,22 +8,41 @@ import secure_rds as secure
 import rds_functions as rds
 import pandas as pd
 import os
+import logging
 
 app = FastAPI()
 
+#Function to removed the created CSV/HTML file
 def remove_file(path):
-    os.unlink(path)
+    try:
+        os.unlink(path)
+        logging.log("Successfully removeed file")
+    except Exception as e:
+        logging.exception("Failed to delete %s." % path)
+
+#Telling the logger where to log the information
+logging.basicConfig(filename="logs/logs.txt", level=logging.DEBUG, format="%(asctime)s %(message)s")
+logging.basicConfig(filename="logs/errors.txt", level=logging.ERROR, format="%(asctime)s %(message)s")
+
 
 @app.get("/dataportal/")
 def home():
+    logging.info("Home page accessed")
     html_string = Path('dataPortalDocumentation.html').read_text()
 #    return {"GBADsKE Data Portal Status": "Up"}
     return HTMLResponse(html_string)
 
 @app.get("/GBADsTables/{public}")
 async def get_public_tables( public: str, format: Optional[str] = "html"):
-    conn = secure.connect_public()
-    cur = conn.cursor()
+    logging.info("GBADsTables/{public} called")
+
+    try:
+        conn = secure.connect_public()
+        cur = conn.cursor()
+        logging.log("Connected to GBAD database")
+    except:
+        logging.log("Error connecting to GBAD database")
+        return "Error connecting to GBAD database"
     tables = rds.displayTables ( cur )
     num = len(tables)
     htmlstring = "<html><body><H2>GBADs Public Database Tables</h2><ul>"
@@ -47,8 +66,16 @@ async def get_public_tables( public: str, format: Optional[str] = "html"):
 
 @app.get("/GBADsTable/{public}")
 async def get_public_table_fields( public: str, table_name: str, format: Optional[str] = "html" ):
-    conn = secure.connect_public()
-    cur = conn.cursor()
+    logging.info("GBADsPublicQuery called")
+
+    try:
+        conn = secure.connect_public()
+        cur = conn.cursor()
+        logging.log("Connected to GBAD database")
+    except:
+        logging.log("Error connecting to GBAD database")
+        return "Error connecting to GBAD database"
+
     fields = rds.displayTabInfo ( cur, table_name )
     num = len(fields)
     htmlstring = "<html><body><H2>Data Fields for "+str(table_name)+"</h2><ul>"
@@ -69,8 +96,16 @@ async def get_public_table_fields( public: str, table_name: str, format: Optiona
 
 @app.get("/GBADsPublicQuery/{table_name}")
 async def get_db_query( table_name: str, fields: str, query: str, join: Optional[str] = "", order: Optional[str] = "", format: Optional[str] = "html", count: Optional[str] = "no", pivot: Optional[str] = "",  background_tasks: BackgroundTasks = None  ):
-    conn = secure.connect_public()
-    cur = conn.cursor()
+    logging.info("GBADsPublicQuery called")
+
+    try:
+        conn = secure.connect_public()
+        cur = conn.cursor()
+        logging.log("Connected to GBAD database")
+    except:
+        logging.log("Error connecting to GBAD database")
+        return "Error connecting to GBAD database"
+
     columns = fields.split(",")
     joinitems = []
     if join != "":
@@ -127,8 +162,18 @@ async def get_db_query( table_name: str, fields: str, query: str, join: Optional
 
 @app.get("/GBADsLivestockPopulation/{data_source}")
 async def get_population ( data_source: str, format: str, year: Optional[str] = "*", iso3: Optional[str] = "*", country: Optional[str] = "*", species: Optional[str] = "*", background_tasks: BackgroundTasks = None ):
-    conn = secure.connect_public()
-    cur = conn.cursor()
+    logging.info("GBADsLivestockPopulation called")
+
+    try:
+        conn = secure.connect_public()
+        cur = conn.cursor()
+        logging.log("Connected to GBAD database")
+    except:
+        logging.log("Error connecting to GBAD database")
+        return "Error connecting to GBAD database"
+
+    print("HERE")
+
     joinstring = ""
     if data_source == "oie":
         table_name = "livestock_national_population_"+data_source
@@ -199,6 +244,7 @@ async def get_population ( data_source: str, format: str, year: Optional[str] = 
     file_name = table_name+".csv"
     f = open(file_name, "w")
     print ( fields, file=f  )
+    print("retQ",retQ)
     for field in retQ:
         x = 0
         htmlstring = htmlstring+"<tr>"
@@ -219,11 +265,15 @@ async def get_population ( data_source: str, format: str, year: Optional[str] = 
     htmlstring = htmlstring+"</table></body></html>"
     f.close()
     if format == "file":
+        print("A")
         # Remove file after sending it
         background_tasks.add_task(remove_file, file_name)
+        logging.info("Returning file "+file_name)
         return FileResponse(file_name,filename=file_name)
 
     elif format == "html":
+        print("B")
+        logging.info("Returning file "+htmlstring)
         return HTMLResponse(htmlstring)
 
 if __name__ == "__main__":

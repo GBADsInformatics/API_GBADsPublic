@@ -3,3 +3,4 @@
 secure_rds.py
 __pycache__
 .DS_Store
+logs/*
