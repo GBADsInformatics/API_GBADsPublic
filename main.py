@@ -119,6 +119,8 @@ async def get_db_query( table_name: str,
                         background_tasks: BackgroundTasks = None  ):
     logging.info("GBADsPublicQuery called")
 
+    count = "yes"
+
     try:
         conn = secure.connect_public()
         cur = conn.cursor()
@@ -140,20 +142,16 @@ async def get_db_query( table_name: str,
     else:
         joinstring = ""
 
-    retQ = None
-
     logging.info("Setting and running the query on the database")
     if count == "no":
         retQ = rds.query(cur, table_name, fields, query, joinstring, order)
         querystr = rds.setQuery ( table_name, fields, query, joinstring )
-    #else:
-    #    querystr = rds.setCountQuery ( table_name, fields, query, joinstring )
-    #if order != "":
-    #    querystr = querystr+" ORDER BY "+str(order)
+    else:
+        retQ = rds.countQuery(cur, table_name, fields, query, joinstring, order)
+        querystr = rds.setCountQuery ( table_name, fields, query, joinstring )
+
 #debugging
-    #print ( query )
-#debugging
-    #retQ = rds.execute ( cur, querystr )
+    print ( query )
 
     logging.info("Formatting the results into a file and reutrn string")
     htmlstring = "<head> <style> table { font-family: arial, sans-serif; border-collapse: collapse; width: 80%; }"
@@ -269,7 +267,7 @@ async def get_population ( data_source: str,
 
     logging.info("Setting and runnning the query on the database")
     querystr = rds.setQuery ( table_name, fields, query, joinstring )
-    retQ = rds.execute ( cur, querystr )
+    retQ = rds.query(cur, table_name, fields, query, joinstring)
 
     htmlstring = "<head> <style> table { font-family: arial, sans-serif; border-collapse: collapse; width: 80%; }"
     htmlstring = htmlstring+" td, th { border: 1px solid #dddddd; text-align: left; padding: 8px; }"
