@@ -20,18 +20,18 @@ It is good to use nohup to ensure that the process is not interrupted.
 To access the API in your web browser start with the command:
 http://localhost:9000/dataportal/
 
-Improvements that need to be made:
-1. Improve the logging
-2. Send error messages to the user and not just to the console
-3. Check to make sure that sql injection is not a problem
-4. Clean up code and document
-5. Add * to fields to generate all fields for the general query capability
-   - fields=* does work but it does not retrieve the field names
-   - need to add a subroutine to fetch field names - the following code will do this:
-
 Improvements made:
 1. Clean up file created by the API
+2. Improved logging
+3. Added parameterized queries to prevent SQL injection attacks
 
+Improvements that need to be made:
+1. Send error messages to the user and not just to the console
+2. Clean up code and document
+3. Add test harness
+4. Add * to fields to generate all fields for the general query capability
+   - fields=* does work but it does not retrieve the field names
+   - need to add a subroutine to fetch field names - the following code will do this:
 
 cur.execute(f"""SELECT * FROM {table_name} ;""")
 
