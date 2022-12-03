@@ -80,6 +80,39 @@ def setJoin ( table_name1, table_name2, jfield_1, jfield_2 ):
     jstring = f"""FROM {table_name1} INNER JOIN {table_name2} ON {table_name1}.{jfield_1}={table_name2}.{jfield_2}"""
     return jstring
 
+
+#
+#
+#
+#
+def query (cursor, table_name, selectstring, wherestring, joinstring, order):
+    print("Success")
+    if wherestring == "":
+        if joinstring == "":
+            if order != "":
+                cursor.execute("SELECT %s FROM %s ORDER BY %s" % (selectstring, table_name, order))
+            else:
+                cursor.execute("SELECT %s FROM %s" % (selectstring, table_name))
+        else:
+            if order != "":
+                cursor.execute("SELECT %s %s ORDER BY %s" % (selectstring, joinstring, order))
+            else:
+                cursor.execute("SELECT %s %s " % (selectstring, joinstring))
+    else:
+        if joinstring == "":
+            if order != "":
+                cursor.execute("SELECT %s FROM %s WHERE %s ORDER BY %s" % (selectstring, table_name, wherestring, order))
+            else:
+                cursor.execute("SELECT %s FROM %s WHERE %s" % (selectstring, table_name, wherestring))
+        else:
+            if order != "":
+                cursor.execute("SELECT %s %s WHERE %s ORDER BY %s" % (selectstring, joinstring, wherestring, order))
+            else:
+                cursor.execute("SELECT %s %s WHERE %s" % (selectstring, joinstring, wherestring))
+
+    answer = cursor.fetchall()
+    return ( answer )
+
 #
 # setQuery builds a query to be sent to the database
 #    Parameter(s): string of fields to be retrieved, query string, join string

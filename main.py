@@ -108,7 +108,15 @@ async def get_public_table_fields( public: str, table_name: str, format: Optiona
         return PlainTextResponse(retstring)
 
 @app.get("/GBADsPublicQuery/{table_name}")
-async def get_db_query( table_name: str, fields: str, query: str, join: Optional[str] = "", order: Optional[str] = "", format: Optional[str] = "html", count: Optional[str] = "no", pivot: Optional[str] = "",  background_tasks: BackgroundTasks = None  ):
+async def get_db_query( table_name: str,
+                        fields: str,
+                        query: str,
+                        join: Optional[str] = "",
+                        order: Optional[str] = "",
+                        format: Optional[str] = "html",
+                        count: Optional[str] = "no",
+                        pivot: Optional[str] = "",
+                        background_tasks: BackgroundTasks = None  ):
     logging.info("GBADsPublicQuery called")
 
     try:
@@ -132,17 +140,20 @@ async def get_db_query( table_name: str, fields: str, query: str, join: Optional
     else:
         joinstring = ""
 
+    retQ = None
+
     logging.info("Setting and running the query on the database")
     if count == "no":
+        retQ = rds.query(cur, table_name, fields, query, joinstring, order)
         querystr = rds.setQuery ( table_name, fields, query, joinstring )
-    else:
-        querystr = rds.setCountQuery ( table_name, fields, query, joinstring )
-    if order != "":
-        querystr = querystr+" ORDER BY "+str(order)
+    #else:
+    #    querystr = rds.setCountQuery ( table_name, fields, query, joinstring )
+    #if order != "":
+    #    querystr = querystr+" ORDER BY "+str(order)
 #debugging
-    print ( query )
+    #print ( query )
 #debugging
-    retQ = rds.execute ( cur, querystr )
+    #retQ = rds.execute ( cur, querystr )
 
     logging.info("Formatting the results into a file and reutrn string")
     htmlstring = "<head> <style> table { font-family: arial, sans-serif; border-collapse: collapse; width: 80%; }"
@@ -181,7 +192,14 @@ async def get_db_query( table_name: str, fields: str, query: str, join: Optional
         return FileResponse(file_name,filename=file_name)
 
 @app.get("/GBADsLivestockPopulation/{data_source}")
-async def get_population ( data_source: str, format: str, year: Optional[str] = "*", iso3: Optional[str] = "*", country: Optional[str] = "*", species: Optional[str] = "*", background_tasks: BackgroundTasks = None ):
+async def get_population ( data_source: str,
+                            format: str,
+                            year: Optional[str] = "*",
+                            iso3: Optional[str] = "*",
+                            country: Optional[str] = "*",
+                            species: Optional[str] = "*",
+                            background_tasks: BackgroundTasks = None ):
+
     logging.info("GBADsLivestockPopulation called")
 
     try:
