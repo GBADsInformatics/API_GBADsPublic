@@ -1,9 +1,9 @@
 #
 #   Functions to perform Postgres database functions on AWS RDS
 #
-#   Author: Deb Stacey
+#   Author: Deb Stacey, Ian McKechnie
 #
-#   Date of last update: October 20, 2021
+#   Date of last update: Dec 3, 2022
 #
 
 #
@@ -148,6 +148,51 @@ def countQuery(cursor, table_name, selectstring, wherestring, joinstring, order:
 
     answer = cursor.fetchall()
     return ( answer )
+
+
+#
+# A OIE Query
+#
+#
+def oieQuery(cursor,
+                fields,
+                table_name,
+                year: Optional[str] = "",
+                country: Optional[str] = "",
+                species: Optional[str] = ""):
+
+    yearQuery = None
+    countryQuery = None
+    speciesQuery = None
+
+    if year != "*": #Done
+        yearQuery = "year="+year
+
+    if country != "*":  #Done
+        countryQuery = "country="+country
+
+    if species != "*":
+        if species == "Poultry":
+            speciesQuery = "(species='Birds' OR species='Layers' OR species='Broilers' OR species='Turkeys' OR species='Other commercial poultry' OR species='Backyard poultry')"
+        elif species == "All Cattle":
+            speciesQuery = "(species='Cattle' OR species='Male and female cattle' OR species='Adult beef cattle' OR species='Adult dairy cattle' OR species='Calves')"
+        elif species == "All Swine":
+            speciesQuery = "(species='Swine' OR species='Adult pigs' OR species='Backyard pigs' OR species='Commercial pigs' OR species='Fattening pigs' OR species='Piglets')"
+        elif species == "All Sheep":
+            speciesQuery = "(species='Sheep' OR species='Adult sheep' OR species='Lambs')"
+        elif species == "All Goats":
+            speciesQuery = "(species='Goats' OR species='Adult goats' OR species='Kids')"
+        elif species == "All Equids":
+            speciesQuery = "(species='Equidae' OR species='Domestic Horses' OR species='Donkeys/ Mules/ Hinnies')"
+        else:
+            speciesQuery = "species="+species
+
+    #cursor.execute("SELECT %s%s%s AND YEAR AND SPECIES FROM %s", (table_name))
+    #cursor.execute("SELECT %s%s%s FROM %s", (table_name))
+    cursor.execute("SELECT %s %s %s FROM %s", ((yearQuery if yearQuery else "") , countryQuery if countryQuery else "", speciesQuery if speciesQuery else "", table_name if table_name else ""))
+    answer = cursor.fetchall()
+    return ( answer )
+    #cursor.execute("SELECT %s FROM %s" % (query, table_name))
 
 #
 # setQuery builds a query that's returned in the html
