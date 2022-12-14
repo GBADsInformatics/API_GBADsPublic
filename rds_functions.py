@@ -122,7 +122,6 @@ def query (cursor, table_name, selectstring, wherestring, joinstring, order: Opt
 #   Returns: The answer to the query
 #
 def countQuery(cursor, table_name, selectstring, wherestring, joinstring, order: Optional[str] = ""):
-    print("Success")
     if wherestring == "":
         if joinstring == "":
             if order != "":
@@ -161,6 +160,7 @@ def oieQuery(cursor,
                 country: Optional[str] = "",
                 species: Optional[str] = ""):
 
+
     yearQuery = None
     countryQuery = None
     speciesQuery = None
@@ -187,9 +187,33 @@ def oieQuery(cursor,
         else:
             speciesQuery = "species="+species
 
+    print ("Start " + speciesQuery + "end")
+
+    if yearQuery and countryQuery and speciesQuery:
+        cursor.execute("SELECT %s %s %s %s FROM %s", (fields, table_name, yearQuery, countryQuery, speciesQuery))
+
+    elif yearQuery and countryQuery:
+        cursor.executer("SELECT %s %s %s FROM %s", (fields, table_name, yearQuery, countryQuery))
+
+    elif yearQuery and speciesQuery:
+        cursor.execute("SELECT %s %s %s FROM %s", (fields, table_name, yearQuery, speciesQuery))
+
+    elif countryQuery and speciesQuery:
+        print("SELECT %s %s %s FROM %s", (fields, countryQuery, speciesQuery, table_name))
+        cursor.execute("SELECT %s %s %s FROM %s", (fields, countryQuery, speciesQuery, table_name))
+
+    elif yearQuery:
+        cursor.execute("SELECT %s %s FROM %s", (fields, table_name, yearQuery))
+    elif countryQuery:
+        cursor.execute("SELECT %s %s FROM %s", (fields, table_name, countryQuery))
+    elif speciesQuery:
+        cursor.execute("SELECT %s %s FROM %s", (fields, table_name, speciesQuery))
+    else:
+        cursor.execute("SELECT %s FROM %s", (fields, table_name))
+
     #cursor.execute("SELECT %s%s%s AND YEAR AND SPECIES FROM %s", (table_name))
     #cursor.execute("SELECT %s%s%s FROM %s", (table_name))
-    cursor.execute("SELECT %s %s %s FROM %s", ((yearQuery if yearQuery else "") , countryQuery if countryQuery else "", speciesQuery if speciesQuery else "", table_name if table_name else ""))
+    #cursor.execute("SELECT %s %s %s FROM %s", ((yearQuery if yearQuery else "") , countryQuery if countryQuery else "", speciesQuery if speciesQuery else "", table_name if table_name else ""))
     answer = cursor.fetchall()
     return ( answer )
     #cursor.execute("SELECT %s FROM %s" % (query, table_name))
