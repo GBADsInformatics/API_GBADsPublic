@@ -44,11 +44,18 @@ async def get_public_tables( public: str, format: Optional[str] = "html"):
         logging.info("Connected to GBAD database")
     except:
         logging.error("Error connecting to GBAD database")
-        return "Error connecting to GBAD database"
+        htmlMsg = rds.generateConnectionErrorMessage()
+        return HTMLResponse(htmlMsg)
 
     #Get the list of tables from the database
     logging.info("Fetching tables")
-    tables = rds.displayTables(cur)
+    try:
+        tables = rds.displayTables(cur)
+    except:
+        logging.error("Error fetching tables")
+        htmlMsg = rds.generateConnectionErrorMessage()
+        return HTMLResponse(htmlMsg)
+
     fieldCount = len(tables)
 
     #Start building HTML string
@@ -90,11 +97,17 @@ async def get_public_table_fields( public: str, table_name: str, format: Optiona
         logging.info("Connected to GBAD database")
     except:
         logging.error("Error connecting to GBAD database")
-        return "Error connecting to GBAD database"
+        htmlMsg = rds.generateConnectionErrorMessage()
+        return HTMLResponse(htmlMsg)
 
     # Get table info
     logging.info("Fetching fields")
-    fields = rds.displayTabInfo ( cur, table_name )
+    try:
+        fields = rds.displayTabInfo ( cur, table_name )
+    except:
+        logging.error("Error fetching fields")
+        htmlMsg = rds.generateConnectionErrorMessage()
+        return HTMLResponse(htmlMsg)
 
     # Format table info int html format and the return string
     fieldCount = len(fields)
@@ -138,7 +151,8 @@ async def get_db_query( table_name: str,
         logging.info("Connected to GBAD database")
     except:
         logging.error("Error connecting to GBAD database")
-        return "Error connecting to GBAD database"
+        htmlMsg = rds.generateConnectionErrorMessage()
+        return HTMLResponse(htmlMsg)
 
     logging.info("Formatting the query")
     joinitems = []
@@ -154,10 +168,22 @@ async def get_db_query( table_name: str,
 
     logging.info("Setting and running the query on the database")
     if count == "no":
-        returnedQuery = rds.query(cur, table_name, fields, query, joinstring, order)
+        try:
+            returnedQuery = rds.query(cur, table_name, fields, query, joinstring, order)
+        except:
+            logging.error("Error running the query")
+            htmlMsg = rds.generateQueryErrorMessage()
+            return HTMLResponse(htmlMsg)
+
         querystr = rds.setQuery ( table_name, fields, query, joinstring )
     else:
-        returnedQuery = rds.countQuery(cur, table_name, fields, query, joinstring, order)
+        try:
+            returnedQuery = rds.countQuery(cur, table_name, fields, query, joinstring, order)
+        except:
+            logging.error("Error running the query")
+            htmlMsg = rds.generateQueryErrorMessage()
+            return HTMLResponse(htmlMsg)
+
         querystr = rds.setCountQuery ( table_name, fields, query, joinstring )
 
 #debugging
@@ -222,16 +248,13 @@ async def get_population ( data_source: str,
         logging.info("Connected to GBAD database")
     except:
         logging.error("Error connecting to GBAD database")
-        return "Error connecting to GBAD database"
-
-
+        htmlMsg = rds.generateConnectionErrorMessage()
+        return HTMLResponse(htmlMsg)
 
     logging.info("Formatting query")
     if data_source == "oie":
         table_name = "livestock_national_population_"+data_source
         fields = "country,year,species,population,metadataflags"
-
-        returnedQuery = rds.oieQuery(cur, fields, table_name, year, country, species)
 
     elif data_source == "faostat":
         table_name = "livestock_countries_population_"+data_source
@@ -244,20 +267,20 @@ async def get_population ( data_source: str,
     query1 = ""
     query2 = ""
     query3 = ""
-    if year != "*": #Done
+    if year != "*":
         query1 = "year="+year
 
-    if country != "*":  #Done
+    if country != "*":
         if data_source == "faostat":
             query2 = "country='"+country+"'"
         elif data_source == "oie":
             query2 = "country='"+country+"'"
 
-    if iso3 != "*": #Done
+    if iso3 != "*":
         if data_source == "faostat":
             query2 = "iso3='"+iso3+"'"
 
-    if species != "*": #Done
+    if species != "*":
         if data_source == "oie":
             if species == "Poultry":
                 query3 = "(species='Birds' OR species='Layers' OR species='Broilers' OR species='Turkeys' OR species='Other commercial poultry' OR species='Backyard poultry')"
@@ -296,7 +319,14 @@ async def get_population ( data_source: str,
     joinstring = ""
     logging.info("Setting and runnning the query on the database")
     querystr = rds.setQuery ( table_name, fields, query, joinstring )
-    #returnedQuery = rds.query(cur, table_name, fields, query, joinstring)
+
+    try:
+        returnedQuery = rds.query(cur, table_name, fields, query, joinstring)
+        logging.info("Query returned")
+    except:
+        logging.error("Error running query")
+        htmlstring = rds.generateQueryErrorMessage()
+        return HTMLResponse(htmlstring)
 
     htmlstring = "<head> <style> table { font-family: arial, sans-serif; border-collapse: collapse; width: 80%; }"
     htmlstring = htmlstring+" td, th { border: 1px solid #dddddd; text-align: left; padding: 8px; }"
@@ -340,6 +370,7 @@ async def get_population ( data_source: str,
         return FileResponse(file_name,filename=file_name)
 
     elif format == "html":
+        background_tasks.add_task(remove_file, file_name)
         logging.info("Returning data as HTML")
         return HTMLResponse(htmlstring)
 

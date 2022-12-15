@@ -24,9 +24,10 @@ Improvements made:
 1. Clean up file created by the API
 2. Improved logging
 3. Added parameterized queries to prevent SQL injection attacks
+4. Send error messages to the user and not just to the console
+
 
 Improvements that need to be made:
-1. Send error messages to the user and not just to the console
 2. Clean up code and document
 3. Add test harness
 4. Add * to fields to generate all fields for the general query capability

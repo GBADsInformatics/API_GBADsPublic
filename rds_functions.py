@@ -33,7 +33,7 @@ def displayTables ( cur ):
 #    Returns: column names and datatypes
 #
 def displayTabInfo ( cur, table_name ):
-    cur.execute(f"""SELECT column_name,data_type FROM information_schema.columns WHERE table_name='{table_name}' ;""")
+    cur.execute("SELECT column_name,data_type FROM information_schema.columns WHERE table_name=%s;" % table_name)
     response = cur.fetchall()
     return response
 
@@ -57,7 +57,8 @@ def checkTable ( cur, table_name ):
 #    Returns: 1 if every field checks out and 0 otherwise
 #
 def checkDataFields ( cur, table_name, fieldstring ):
-    cur.execute(f"""SELECT column_name FROM information_schema.columns WHERE table_name='{table_name}' ;""")
+    cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name=%s;" % table_name)
+    #cur.execute(f"""SELECT column_name FROM information_schema.columns WHERE table_name='{table_name}' ;""")
     fields_list = cur.fetchall()
     ret = 0
     flist = fieldstring.split(",")
@@ -150,97 +151,28 @@ def countQuery(cursor, table_name, selectstring, wherestring, joinstring, order:
 
 
 #
-# A OIE Query
-#
-#
-def oieQuery(cursor,
-                fields,
-                table_name,
-                year: Optional[str] = "",
-                country: Optional[str] = "",
-                species: Optional[str] = ""):
-
-
-    yearQuery = None
-    countryQuery = None
-    speciesQuery = None
-
-    if year != "*": #Done
-        yearQuery = "year="+year
-
-    if country != "*":  #Done
-        countryQuery = "country="+country
-
-    if species != "*":
-        if species == "Poultry":
-            speciesQuery = "(species='Birds' OR species='Layers' OR species='Broilers' OR species='Turkeys' OR species='Other commercial poultry' OR species='Backyard poultry')"
-        elif species == "All Cattle":
-            speciesQuery = "(species='Cattle' OR species='Male and female cattle' OR species='Adult beef cattle' OR species='Adult dairy cattle' OR species='Calves')"
-        elif species == "All Swine":
-            speciesQuery = "(species='Swine' OR species='Adult pigs' OR species='Backyard pigs' OR species='Commercial pigs' OR species='Fattening pigs' OR species='Piglets')"
-        elif species == "All Sheep":
-            speciesQuery = "(species='Sheep' OR species='Adult sheep' OR species='Lambs')"
-        elif species == "All Goats":
-            speciesQuery = "(species='Goats' OR species='Adult goats' OR species='Kids')"
-        elif species == "All Equids":
-            speciesQuery = "(species='Equidae' OR species='Domestic Horses' OR species='Donkeys/ Mules/ Hinnies')"
-        else:
-            speciesQuery = "species="+species
-
-    print ("Start " + speciesQuery + "end")
-
-    if yearQuery and countryQuery and speciesQuery:
-        cursor.execute("SELECT %s %s %s %s FROM %s", (fields, table_name, yearQuery, countryQuery, speciesQuery))
-
-    elif yearQuery and countryQuery:
-        cursor.executer("SELECT %s %s %s FROM %s", (fields, table_name, yearQuery, countryQuery))
-
-    elif yearQuery and speciesQuery:
-        cursor.execute("SELECT %s %s %s FROM %s", (fields, table_name, yearQuery, speciesQuery))
-
-    elif countryQuery and speciesQuery:
-        print("SELECT %s %s %s FROM %s", (fields, countryQuery, speciesQuery, table_name))
-        cursor.execute("SELECT %s %s %s FROM %s", (fields, countryQuery, speciesQuery, table_name))
-
-    elif yearQuery:
-        cursor.execute("SELECT %s %s FROM %s", (fields, table_name, yearQuery))
-    elif countryQuery:
-        cursor.execute("SELECT %s %s FROM %s", (fields, table_name, countryQuery))
-    elif speciesQuery:
-        cursor.execute("SELECT %s %s FROM %s", (fields, table_name, speciesQuery))
-    else:
-        cursor.execute("SELECT %s FROM %s", (fields, table_name))
-
-    #cursor.execute("SELECT %s%s%s AND YEAR AND SPECIES FROM %s", (table_name))
-    #cursor.execute("SELECT %s%s%s FROM %s", (table_name))
-    #cursor.execute("SELECT %s %s %s FROM %s", ((yearQuery if yearQuery else "") , countryQuery if countryQuery else "", speciesQuery if speciesQuery else "", table_name if table_name else ""))
-    answer = cursor.fetchall()
-    return ( answer )
-    #cursor.execute("SELECT %s FROM %s" % (query, table_name))
-
-#
 # setQuery builds a query that's returned in the html
 #    Parameter(s): string of fields to be retrieved, query string, join string
 #    Returns: completed query string
 #
-def setQuery ( table_name, selectstring, wherestring, joinstring ):
-    if wherestring == "":
+def setQuery ( table_name, fields, query, joinstring ):
+    if query == "":
         if joinstring == "":
-            querystring = f"""SELECT {selectstring} FROM {table_name}"""
+            querystring = f"""SELECT {fields} FROM {table_name}"""
         else:
-            querystring = f"""SELECT {selectstring} {joinstring}"""
+            querystring = f"""SELECT {fields} {joinstring}"""
     else:
         if joinstring == "":
-            querystring = f"""SELECT {selectstring} FROM {table_name} WHERE {wherestring}"""
+            querystring = f"""SELECT {fields} FROM {table_name} WHERE {query}"""
         else:
-            querystring = f"""SELECT {selectstring} {joinstring} WHERE {wherestring}"""
+            querystring = f"""SELECT {fields} {joinstring} WHERE {query}"""
     return ( querystring )
 
 #
 # setCountQuery builds a query to be sent to the database to retrieve the number of records
 #    that match the query
 #    Parameter(s): string of fields to be retrieved, query string, join string
-#    Returns: completed query string
+#    Returns: completed query  
 #
 def setCountQuery ( table_name, selectstring, wherestring, joinstring ):
     if wherestring == "":
@@ -264,6 +196,56 @@ def execute ( cur, querystring ):
     cur.execute(f"""{querystring}""")
     answer = cur.fetchall()
     return ( answer )
+
+def generateFieldNames(cur, tablename):
+    cur.execute("SELECT * FROM %s" % (tablename))
+    rows = cur.fetchone()
+    colunmnames = [desc[0] for desc in cur.description]
+    reutnr 
+
+#Error message for bad query
+def generateQueryErrorMessage():
+    html = """ <!DOCTYPE html>
+        <html>
+        <head>
+        <title>
+        Error</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+        body {background-color:#ffffff;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
+        h1{font-family:Arial, sans-serif;color:#000000;background-color:#ffffff;}
+        p {font-family:Georgia, serif;font-size:14px;font-style:normal;font-weight:normal;color:#000000;background-color:#ffffff;}
+        </style>
+        </head>
+        <body>
+        <h1>Error</h1>
+        <p>Invalid query given</p>
+        </body>
+        </html>"""
+
+    return html
+
+#Error for not being able to connect to the database
+def generateConnectionErrorMessage():
+    html = """ <!DOCTYPE html>
+        <html>
+        <head>
+        <title>
+        Error</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+        body {background-color:#ffffff;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
+        h1{font-family:Arial, sans-serif;color:#000000;background-color:#ffffff;}
+        p {font-family:Georgia, serif;font-size:14px;font-style:normal;font-weight:normal;color:#000000;background-color:#ffffff;}
+        </style>
+        </head>
+        <body>
+        <h1>Error</h1>
+        <p>Unable to connect to database</p>
+        </body>
+        </html>"""
+
+    return html
 
 #
 #   End of rds_functions.py
