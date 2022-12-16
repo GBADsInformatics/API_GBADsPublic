@@ -49,6 +49,6 @@ password information so you must request it from Deb Stacey
 
 ## Example Calls From each API
 1. ```http://localhost:9000/GBADsTables/public?format=html```
-2. ```http://localhost:900/GBADsTable/public?table_name=livestock_production_faostat&format=html```
+2. ```http://localhost:9000/GBADsTable/public?table_name=livestock_production_faostat&format=html```
 3. ```http://localhost:9000/GBADsPublicQuery/livestock_production_faostat?fields=country,year,species,population&query=year=2017%20AND%20species=%27Goats%27&format=html```
 4. ```http://localhost:9000/GBADsLivestockPopulation/oie?year=*&country=Canada&species=Cattle&format=html```

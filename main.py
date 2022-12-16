@@ -88,7 +88,7 @@ async def get_public_tables( public: str, format: Optional[str] = "html"):
 
 @app.get("/GBADsTable/{public}")
 async def get_public_table_fields( public: str, table_name: str, format: Optional[str] = "html" ):
-    logging.info("GBADsPublicQuery called")
+    logging.info("GBADs Public Query called")
 
     # Establish connection to AWS
     try:
@@ -157,11 +157,18 @@ async def get_db_query( table_name: str,
     # Get all fields if fields == *
     if fields == "*":
         try:
-            fields = rds.generateFieldNames ( cur, table_name )
+            newfields = rds.generateFieldNames ( cur, table_name )
         except:
             logging.error("Error fetching fields")
             htmlMsg = rds.generateHTMLErrorMessage("Error fetching fields")
             return HTMLResponse(htmlMsg)
+
+        # Format the fields into a string
+        fields = ""
+        for i in range(len(newfields)):
+            fields = fields+newfields[i]
+            if i < len(newfields)-1:
+                fields = fields+","
 
     logging.info("Formatting the query")
     joinitems = []
@@ -181,7 +188,7 @@ async def get_db_query( table_name: str,
             returnedQuery = rds.query(cur, table_name, fields, query, joinstring, order)
         except:
             logging.error("Error running the query")
-            htmlMsg = rds.generateHTMLErrorMessage("Error running the query")
+            htmlMsg = rds.generateHTMLErrorMessage("Error in the given query. Please check the syntax and try again.")
             return HTMLResponse(htmlMsg)
 
         querystr = rds.setQuery ( table_name, fields, query, joinstring )
@@ -190,7 +197,7 @@ async def get_db_query( table_name: str,
             returnedQuery = rds.countQuery(cur, table_name, fields, query, joinstring, order)
         except:
             logging.error("Error running the query")
-            htmlMsg = rds.generateHTMLErrorMessage("Error running the query")
+            htmlMsg = rds.generateHTMLErrorMessage("Error in the given query. Please check the syntax and try again.")
             return HTMLResponse(htmlMsg)
 
         querystr = rds.setCountQuery ( table_name, fields, query, joinstring )
@@ -215,7 +222,6 @@ async def get_db_query( table_name: str,
 
     # Format the rows of the table
     for field in returnedQuery:
-        print("Field is: ", field)
         x = 0
         htmlstring = htmlstring+"<tr>"
         while x < len(field)-1:
@@ -334,7 +340,7 @@ async def get_population ( data_source: str,
         logging.info("Query returned")
     except:
         logging.error("Error running query")
-        htmlstring = rds.generateQueryErrorMessage()
+        htmlstring = rds.generateHTMLErrorMessage("Error in the given query. Please check the syntax and try again.")
         return HTMLResponse(htmlstring)
 
     htmlstring = "<head> <style> table { font-family: arial, sans-serif; border-collapse: collapse; width: 80%; }"

@@ -33,7 +33,7 @@ def displayTables ( cur ):
 #    Returns: column names and datatypes
 #
 def displayTabInfo ( cur, table_name ):
-    cur.execute("SELECT column_name,data_type FROM information_schema.columns WHERE table_name=%s;" % table_name)
+    cur.execute("SELECT column_name,data_type FROM information_schema.columns WHERE table_name='%s';" % (table_name))
     response = cur.fetchall()
     return response
 
@@ -57,7 +57,7 @@ def checkTable ( cur, table_name ):
 #    Returns: 1 if every field checks out and 0 otherwise
 #
 def checkDataFields ( cur, table_name, fieldstring ):
-    cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name=%s;" % table_name)
+    cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name=%s;" % (table_name))
     #cur.execute(f"""SELECT column_name FROM information_schema.columns WHERE table_name='{table_name}' ;""")
     fields_list = cur.fetchall()
     ret = 0
