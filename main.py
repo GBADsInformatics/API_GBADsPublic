@@ -141,7 +141,7 @@ async def get_db_query( table_name: str,
                         format: Optional[str] = "html",
                         count: Optional[str] = "no",
                         pivot: Optional[str] = "",
-                        background_tasks: BackgroundTasks = None  ):
+                        background_tasks: BackgroundTasks = None ):
     logging.info("GBADsPublicQuery called")
 
     # Establish connection to AWS
@@ -238,7 +238,7 @@ async def get_db_query( table_name: str,
     # Return the html or text string to the user
     if format == "html":
         logging.info("Returning results as HTML")
-        remove_file(file_name)
+        background_tasks.add_task(remove_file, file_name)
         return HTMLResponse(htmlstring)
     else:
         logging.info("Returning results as CSV")
@@ -387,6 +387,11 @@ async def get_population ( data_source: str,
     elif format == "html":
         background_tasks.add_task(remove_file, file_name)
         logging.info("Returning data as HTML")
+        return HTMLResponse(htmlstring)
+    else :
+        logging.error("Invalid format")
+        background_tasks.add_task(remove_file, file_name)
+        htmlstring = rds.generateHTMLErrorMessage("Invalid format. Please use html or file.")
         return HTMLResponse(htmlstring)
 
 if __name__ == "__main__":
