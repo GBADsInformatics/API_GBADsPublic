@@ -172,7 +172,7 @@ def setQuery ( table_name, fields, query, joinstring ):
 # setCountQuery builds a query to be sent to the database to retrieve the number of records
 #    that match the query
 #    Parameter(s): string of fields to be retrieved, query string, join string
-#    Returns: completed query  
+#    Returns: completed query
 #
 def setCountQuery ( table_name, selectstring, wherestring, joinstring ):
     if wherestring == "":
@@ -201,10 +201,10 @@ def generateFieldNames(cur, tablename):
     cur.execute("SELECT * FROM %s" % (tablename))
     rows = cur.fetchone()
     colunmnames = [desc[0] for desc in cur.description]
-    reutnr 
+    return colunmnames
 
 #Error message for bad query
-def generateQueryErrorMessage():
+def generateHTMLErrorMessage(msg):
     html = """ <!DOCTYPE html>
         <html>
         <head>
@@ -219,29 +219,7 @@ def generateQueryErrorMessage():
         </head>
         <body>
         <h1>Error</h1>
-        <p>Invalid query given</p>
-        </body>
-        </html>"""
-
-    return html
-
-#Error for not being able to connect to the database
-def generateConnectionErrorMessage():
-    html = """ <!DOCTYPE html>
-        <html>
-        <head>
-        <title>
-        Error</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <style>
-        body {background-color:#ffffff;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
-        h1{font-family:Arial, sans-serif;color:#000000;background-color:#ffffff;}
-        p {font-family:Georgia, serif;font-size:14px;font-style:normal;font-weight:normal;color:#000000;background-color:#ffffff;}
-        </style>
-        </head>
-        <body>
-        <h1>Error</h1>
-        <p>Unable to connect to database</p>
+        <p>""" + msg +"""</p>
         </body>
         </html>"""
 

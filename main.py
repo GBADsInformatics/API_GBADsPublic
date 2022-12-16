@@ -44,7 +44,7 @@ async def get_public_tables( public: str, format: Optional[str] = "html"):
         logging.info("Connected to GBAD database")
     except:
         logging.error("Error connecting to GBAD database")
-        htmlMsg = rds.generateConnectionErrorMessage()
+        htmlMsg = rds.generateHTMLErrorMessage("Error connecting to Database")
         return HTMLResponse(htmlMsg)
 
     #Get the list of tables from the database
@@ -53,7 +53,7 @@ async def get_public_tables( public: str, format: Optional[str] = "html"):
         tables = rds.displayTables(cur)
     except:
         logging.error("Error fetching tables")
-        htmlMsg = rds.generateConnectionErrorMessage()
+        htmlMsg = rds.generateHTMLErrorMessage("Error fetching tables")
         return HTMLResponse(htmlMsg)
 
     fieldCount = len(tables)
@@ -97,7 +97,7 @@ async def get_public_table_fields( public: str, table_name: str, format: Optiona
         logging.info("Connected to GBAD database")
     except:
         logging.error("Error connecting to GBAD database")
-        htmlMsg = rds.generateConnectionErrorMessage()
+        htmlMsg = rds.generateHTMLErrorMessage("Error connecting to Database")
         return HTMLResponse(htmlMsg)
 
     # Get table info
@@ -106,7 +106,7 @@ async def get_public_table_fields( public: str, table_name: str, format: Optiona
         fields = rds.displayTabInfo ( cur, table_name )
     except:
         logging.error("Error fetching fields")
-        htmlMsg = rds.generateConnectionErrorMessage()
+        htmlMsg = rds.generateHTMLErrorMessage("Error fetching fields")
         return HTMLResponse(htmlMsg)
 
     # Format table info int html format and the return string
@@ -151,8 +151,17 @@ async def get_db_query( table_name: str,
         logging.info("Connected to GBAD database")
     except:
         logging.error("Error connecting to GBAD database")
-        htmlMsg = rds.generateConnectionErrorMessage()
+        htmlMsg = rds.generateHTMLErrorMessage("Error connecting to Database")
         return HTMLResponse(htmlMsg)
+
+    # Get all fields if fields == *
+    if fields == "*":
+        try:
+            fields = rds.generateFieldNames ( cur, table_name )
+        except:
+            logging.error("Error fetching fields")
+            htmlMsg = rds.generateHTMLErrorMessage("Error fetching fields")
+            return HTMLResponse(htmlMsg)
 
     logging.info("Formatting the query")
     joinitems = []
@@ -172,7 +181,7 @@ async def get_db_query( table_name: str,
             returnedQuery = rds.query(cur, table_name, fields, query, joinstring, order)
         except:
             logging.error("Error running the query")
-            htmlMsg = rds.generateQueryErrorMessage()
+            htmlMsg = rds.generateHTMLErrorMessage("Error running the query")
             return HTMLResponse(htmlMsg)
 
         querystr = rds.setQuery ( table_name, fields, query, joinstring )
@@ -181,7 +190,7 @@ async def get_db_query( table_name: str,
             returnedQuery = rds.countQuery(cur, table_name, fields, query, joinstring, order)
         except:
             logging.error("Error running the query")
-            htmlMsg = rds.generateQueryErrorMessage()
+            htmlMsg = rds.generateHTMLErrorMessage("Error running the query")
             return HTMLResponse(htmlMsg)
 
         querystr = rds.setCountQuery ( table_name, fields, query, joinstring )
@@ -248,7 +257,7 @@ async def get_population ( data_source: str,
         logging.info("Connected to GBAD database")
     except:
         logging.error("Error connecting to GBAD database")
-        htmlMsg = rds.generateConnectionErrorMessage()
+        htmlMsg = rds.generateHTMLErrorMessage("Error connecting to Database")
         return HTMLResponse(htmlMsg)
 
     logging.info("Formatting query")

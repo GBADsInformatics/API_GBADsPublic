@@ -25,11 +25,6 @@ Improvements made:
 2. Improved logging
 3. Added parameterized queries to prevent SQL injection attacks
 4. Send error messages to the user and not just to the console
-
-
-Improvements that need to be made:
-2. Clean up code and document
-3. Add test harness
 4. Add * to fields to generate all fields for the general query capability
    - fields=* does work but it does not retrieve the field names
    - need to add a subroutine to fetch field names - the following code will do this:
@@ -39,6 +34,12 @@ cur.execute(f"""SELECT * FROM {table_name} ;""")
 rows = cur.fetchone()
 
 column_names = [desc[0] for desc in cur.description]
+
+
+Improvements that need to be made:
+2. Clean up code and document
+3. Add test harness
+
 
 ## Notes
 
