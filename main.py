@@ -20,6 +20,7 @@ def remove_file(path):
     except Exception as e:
         logging.error("Failed to delete %s." % path)
 
+
 #Telling the logger where to log the information
 logging.basicConfig(filename="logs/logs.txt", level=logging.DEBUG, format="%(asctime)s %(message)s")
 logging.basicConfig(filename="logs/errors.txt", level=logging.ERROR, format="%(asctime)s %(message)s")
@@ -32,9 +33,11 @@ def home():
     html_string = Path('dataPortalDocumentation.html').read_text()
     return HTMLResponse(html_string)
 
+
 #Used to access the list of all tables
 @app.get("/GBADsTables/{public}")
-async def get_public_tables( public: str, format: Optional[str] = "html"):
+async def get_public_tables( public: str, 
+                                format: Optional[str] = "html"):
     logging.info("GBADsTables/{public} called")
 
     #Establish a connection to the aws server
@@ -87,7 +90,9 @@ async def get_public_tables( public: str, format: Optional[str] = "html"):
 
 
 @app.get("/GBADsTable/{public}")
-async def get_public_table_fields( public: str, table_name: str, format: Optional[str] = "html" ):
+async def get_public_table_fields( public: str, 
+                                    table_name: str, 
+                                    format: Optional[str] = "html" ):
     logging.info("GBADs Public Query called")
 
     # Establish connection to AWS
@@ -131,6 +136,7 @@ async def get_public_table_fields( public: str, table_name: str, format: Optiona
     else:
         logging.info("Returning fields as text")
         return PlainTextResponse(retstring)
+
 
 @app.get("/GBADsPublicQuery/{table_name}")
 async def get_db_query( table_name: str,
@@ -244,6 +250,7 @@ async def get_db_query( table_name: str,
         logging.info("Returning results as CSV")
         background_tasks.add_task(remove_file, file_name)
         return FileResponse(file_name,filename=file_name)
+
 
 @app.get("/GBADsLivestockPopulation/{data_source}")
 async def get_population ( data_source: str,
@@ -393,6 +400,7 @@ async def get_population ( data_source: str,
         background_tasks.add_task(remove_file, file_name)
         htmlstring = rds.generateHTMLErrorMessage("Invalid format. Please use html or file.")
         return HTMLResponse(htmlstring)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=9000)
