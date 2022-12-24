@@ -129,7 +129,7 @@ http://gbadske.org:9000/GBADsPublicQuery/livestock_production_faostat?fields=cou
 5. order - this is the order you want to return the results in.
     - It will default to no order if no order is specified
 6. format - this is the format you want the results returned in (html or text/csv).
-    - It will default to html if no format is specified
+    - It will default to csv if no format is specified
     - You can set it to *html* to return html, otherwise it will return a csv file
 7. count - If set to anything other than no, returns the number of rows returned by the query.
     - It will default to no if no count is specified
